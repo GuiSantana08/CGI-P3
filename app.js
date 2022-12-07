@@ -1,4 +1,7 @@
-import { lookAt, perspective, vec3 } from "../../libs/MV";
+import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from '../../libs/utils.js';
+import {flatten, lookAt, perspective, vec3, normalMatrix } from "../../libs/MV.js";
+
+import * as dat from '../../libs/dat.gui.module.js';
 
 import * as SPHERE from '../../libs/objects/sphere.js';
 import * as CUBE from '../../libs/objects/cube.js';
@@ -6,9 +9,10 @@ import * as TORUS from '../../libs/objects/torus.js';
 import * as CYLINDER from '../../libs/objects/cylinder.js';
 import * as BUNNY from '../../libs/objects/bunny.js';
 
-
+import * as STACK from '../../libs/stack.js';
 
 function main(shaders){
+    
     let camera = {
         eye: vec3(0,5,10),
         at: vec3(0,0,0),
@@ -23,7 +27,7 @@ function main(shaders){
             ambient: [50, 50, 50],
             diffuse: [60,60,60],
             specular: [200,200,200],
-            position: [00,0.0,10.0,1.0],
+            position: [0,0.0,10.0,1.0],
             axis: [0.0,0.0,-1.0],
             aperture: 10.0,
             cutoff:10
@@ -38,13 +42,13 @@ function main(shaders){
             cutoff: -1,
         },
         {
-        ambient: [75, 75, 100],
-        diffuse: [75, 75, 100],
-        specular: [150, 150, 175],
-        position: [5.0, 5.0, 2.0, 1.0],
-        axis: [-5.0, -5.0, -2.0],
-        aperture: 180.0,
-        cutoff: -1,
+            ambient: [75, 75, 100],
+            diffuse: [75, 75, 100],
+            specular: [150, 150, 175],
+            position: [5.0, 5.0, 2.0, 1.0],
+            axis: [-5.0, -5.0, -2.0],
+            aperture: 180.0,
+            cutoff: -1,
         }
     ];
 
@@ -101,31 +105,103 @@ function main(shaders){
 
     const program = programP;
 
+    const gui = new dat.GUI();
+
+
+
     gl.viewport(0,0,canvas.width, canvas.height);
     gl.clearColor(0, 0, 0, 1.0); //cor de fundo
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
-    gl.enable(gl.BACK);
+    //gl.enable(gl.BACK);
+
+    resizeCanvasToFullWindow();
+    window.addEventListener('resize', resizeCanvasToFullWindow);
 
     CUBE.init(gl);
     SPHERE.init(gl);
     TORUS.init(gl);
     CYLINDER.init(gl);
     BUNNY.init(gl);
+    
 
-    setupGUI();
+    //setupGUI();
+
+    window.requestAnimationFrame(render);
+
+    function resizeCanvasToFullWindow()
+    {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        camera.aspect = canvas.width / canvas.height;
+
+        gl.viewport(0,0,canvas.width, canvas.height);
+    }
 
     let mode = gl.TRIANGLES;
 
     let mView = lookAt( camera.eye, camera.at, camera.up);
-    let mProjection = perspective(camera.fovy, __, camera.near, camera.far); //INCOMPLETO
-
-    
-
-
+    let mProjection = perspective(camera.fovy, aspect, camera.near, camera.far);
     
     
+    let lastX, lastY;
+    let down = false;
+
+    function render()
+    {
+        window.requestAnimationFrame(render);
+
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        
+        gl.useProgram(program);
+        
+        STACK.loadMatrix(mView);
+    
+
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "mProjection"), false, flatten(mProjection));
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "mNormals"), false, flatten(normalMatrix(STACK.modelView())));
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "mView"), false, flatten(mView));
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "mViewNormals"), false, flatten(normalMatrix(mView)));
+        gl.uniform1i(gl.getUniformLocation(program,"uNLights"),lights.length);
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "mViewF"), false, flatten(mView));
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "mViewNormalsF"), false, flatten(normalMatrix(mView)));
+
+        
+        gl.uniform3fv(gl.getUniformLocation(program,"T.Ka"),groundMaterial.Ka );
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Kd"),groundMaterial.Kd );
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ks"),groundMaterial.Ks );
+        gl.uniform1f(gl.getUniformLocation(program,"uMaterial.shininess"),groundMaterial.shininess);
+
+        STACK.pushMatrix();
+        STACK.multTranslation([0,-0.25,0])
+        STACK.multScale([10,0.5,10]);
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
+        CUBE.draw(gl, program, mode);
+        STACK.popMatrix();
+        for(let i = 0; i < lights.length; i++){
+            let ambient = vec3(lights[i].ambient[0] / 255 , lights[i].ambient[1] / 255 ,lights[i].ambient[2]/255);
+            let diffuse = vec3(lights[i].diffuse[0] / 255 , lights[i].diffuse[1] / 255 ,lights[i].diffuse[2]/255);
+            let specular = vec3(lights[i].specular[0] / 255 , lights[i].specular[1] / 255 ,lights[i].specular[2]/255);
+        
+                
+            gl.uniform3fv(gl.getUniformLocation(program, "uLight[" + i +"].Ia"),ambient);
+            gl.uniform3fv(gl.getUniformLocation(program, "uLight[" + i +"].Id"),diffuse);
+            gl.uniform3fv(gl.getUniformLocation(program, "uLight[" + i +"].Is"),specular);
+            gl.uniform4fv(gl.getUniformLocation(program, "uLight[" + i +"].pos"),lights[i].position);
+            gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isDirectional"), lights[i].directional);
+            gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isActive"), lights[i].active);
+    
+        }
 
 
-
+        
+    }
+    
 }
+
+
+const urls = ['shader.vert', 'shader.frag'];
+
+loadShadersFromURLS(urls).then( shaders => main(shaders));
