@@ -30,7 +30,10 @@ function main(shaders){
             position: [0,0.0,10.0,1.0],
             axis: [0.0,0.0,-1.0],
             aperture: 10.0,
-            cutoff:10
+            cutoff:10,
+            directional: true,
+            active: false,
+            spotlight: false
         },
         {
             ambient: [50, 0, 0],
@@ -40,6 +43,9 @@ function main(shaders){
             axis: [20.0, -5.0, -5.0],
             aperture: 180.0,
             cutoff: -1,
+            directional: false,
+            active: true,
+            spotlight: false
         },
         {
             ambient: [75, 75, 100],
@@ -49,6 +55,9 @@ function main(shaders){
             axis: [-5.0, -5.0, -2.0],
             aperture: 180.0,
             cutoff: -1,
+            directional: false,
+            active: false,
+            spotlight: true
         }
     ];
 
