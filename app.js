@@ -238,6 +238,9 @@ function main(shaders){
     {
         window.requestAnimationFrame(render);
 
+        mView = lookAt( camera.eye, camera.at, camera.up);
+        mProjection = perspective(camera.fovy, aspect, camera.near, camera.far);
+
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         
         gl.useProgram(program);
@@ -255,17 +258,63 @@ function main(shaders){
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mViewNormalsF"), false, flatten(normalMatrix(mView)));
 
         
-        gl.uniform3fv(gl.getUniformLocation(program,"T.Ka"),groundMaterial.Ka );
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ka"),groundMaterial.Ka );
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Kd"),groundMaterial.Kd );
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ks"),groundMaterial.Ks );
         gl.uniform1f(gl.getUniformLocation(program,"uMaterial.shininess"),groundMaterial.shininess);
 
         STACK.pushMatrix();
-        STACK.multTranslation([0,-0.25,0])
-        STACK.multScale([10,0.5,10]);
-        gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
-        CUBE.draw(gl, program, mode);
+            STACK.multTranslation([0,-0.25,0])
+            STACK.multScale([10,0.5,10]);
+            gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
+            CUBE.draw(gl, program, mode);
         STACK.popMatrix();
+
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ka"),cubeMaterial.Ka );
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Kd"),cubeMaterial.Kd );
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ks"),cubeMaterial.Ks );
+        gl.uniform1f(gl.getUniformLocation(program,"uMaterial.shininess"),cubeMaterial.shininess);
+        STACK.pushMatrix();
+            STACK.multTranslation([-2.5,0.5,-2.5]);
+            STACK.multScale([2,2,2])
+            gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
+            CUBE.draw(gl,program,gl.TRIANGLES);
+        STACK.popMatrix();
+        
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ka"),cylinderMaterial.Ka );
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Kd"),cylinderMaterial.Kd );
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ks"),cylinderMaterial.Ks );
+        gl.uniform1f(gl.getUniformLocation(program,"uMaterial.shininess"),cylinderMaterial.shininess);
+        STACK.pushMatrix();
+            STACK.multTranslation([2.5,0.5,-2.5]);
+            STACK.multScale([2,2,2])
+            gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
+            CYLINDER.draw(gl,program,gl.TRIANGLES);
+        STACK.popMatrix();
+        
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ka"),torusMaterial.Ka );
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Kd"),torusMaterial.Kd );
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ks"),torusMaterial.Ks );
+        gl.uniform1f(gl.getUniformLocation(program,"uMaterial.shininess"),torusMaterial.shininess);
+        STACK.pushMatrix();
+            STACK.multTranslation([-2.5,0.5,2.5]);
+            STACK.multScale([2,2,2])
+            gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
+            TORUS.draw(gl,program,gl.TRIANGLES);
+        STACK.popMatrix();
+        
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ka"),bunnyMaterial.Ka );
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Kd"),bunnyMaterial.Kd );
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ks"),bunnyMaterial.Ks );
+        gl.uniform1f(gl.getUniformLocation(program,"uMaterial.shininess"),bunnyMaterial.shininess);
+        STACK.pushMatrix();
+            STACK.multTranslation([2.5,0.5,2.5]);
+            gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
+            BUNNY.draw(gl,program,gl.TRIANGLES);
+            STACK.popMatrix();
+        STACK.popMatrix()
+
+
         for(let i = 0; i < lights.length; i++){
             let ambient = vec3(lights[i].ambient[0] / 255 , lights[i].ambient[1] / 255 ,lights[i].ambient[2]/255);
             let diffuse = vec3(lights[i].diffuse[0] / 255 , lights[i].diffuse[1] / 255 ,lights[i].diffuse[2]/255);
