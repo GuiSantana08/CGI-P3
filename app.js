@@ -116,9 +116,9 @@ function main(shaders){
     optionsFolder.add(options, 'depth test',0,100);
 
     //camera
-    cameraFolder.add(camera, 'fovy', 0, 360);
-    cameraFolder.add(camera, 'near' , 0, 360);
-    cameraFolder.add(camera, 'far' , 0, 360);
+    cameraFolder.add(camera, 'fovy', 0, 100);
+    cameraFolder.add(camera, 'near' , 0.1, 20);
+    cameraFolder.add(camera, 'far' , 0.1, 20);
     const eyeFolder = cameraFolder.addFolder('eye');
     const atFolder= cameraFolder.addFolder('at');
     const upFolder= cameraFolder.addFolder('up');
@@ -198,7 +198,7 @@ function main(shaders){
 
 
     gl.viewport(0,0,canvas.width, canvas.height);
-    gl.clearColor(1, 1, 1, 1.0); //cor de fundo
+    gl.clearColor(0, 0, 0, 1.0); //cor de fundo
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
     //gl.enable(gl.BACK);
@@ -311,12 +311,14 @@ function main(shaders){
             TORUS.draw(gl,program,gl.TRIANGLES);
         STACK.popMatrix();
         
-        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ka"),bunnyMaterial.Ka );
-        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Kd"),bunnyMaterial.Kd );
-        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ks"),bunnyMaterial.Ks );
+
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ka"),bunnyMaterial.Ka);
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Kd"),bunnyMaterial.Kd);
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ks"),bunnyMaterial.Ks);
         gl.uniform1f(gl.getUniformLocation(program,"uMaterial.shininess"),bunnyMaterial.shininess);
         STACK.pushMatrix();
             STACK.multTranslation([2.5,0.5,2.5]);
+            STACK.multScale([12,12,12]);
             gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
             BUNNY.draw(gl,program,gl.TRIANGLES);
             STACK.popMatrix();
@@ -324,9 +326,9 @@ function main(shaders){
 
 
         for(let i = 0; i < lights.length; i++){
-            let ambient = vec3(lights[i].ambient[0] / 255 , lights[i].ambient[1] / 255 ,lights[i].ambient[2]/255);
-            let diffuse = vec3(lights[i].diffuse[0] / 255 , lights[i].diffuse[1] / 255 ,lights[i].diffuse[2]/255);
-            let specular = vec3(lights[i].specular[0] / 255 , lights[i].specular[1] / 255 ,lights[i].specular[2]/255);
+            let ambient = vec3(lights[i].ambient[0], lights[i].ambient[1],lights[i].ambient[2]);
+            let diffuse = vec3(lights[i].diffuse[0], lights[i].diffuse[1],lights[i].diffuse[2]);
+            let specular = vec3(lights[i].specular[0], lights[i].specular[1],lights[i].specular[2]);
         
                 
             gl.uniform3fv(gl.getUniformLocation(program, "uLight[" + i +"].Ia"),ambient);

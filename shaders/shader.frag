@@ -2,11 +2,10 @@ precision highp float;
 
 uniform bool uUseNormals;
 
-const int MAX_LIGHTS = 8;
+const int MAX_LIGHTS = 4;
 
 struct LightInfo {
-    //Light colour intensities
-    vec4 pos;
+    vec3 pos;
     vec3 Ia;
     vec3 Id;
     vec3 Is;
@@ -21,16 +20,14 @@ struct MaterialInfo {
     float shininess;
 };
 
-uniform int uNLights; // Effective number of lights used
-
-uniform LightInfo uLight[MAX_LIGHTS]; // The array of lights present in the scene
-uniform MaterialInfo uMaterial;  // The material of the object being drawn
-
 uniform mat4 mViewF;
 uniform mat4 mViewNormalsF;
 
 
+uniform int uNLights; // Effective number of lights used
 
+uniform LightInfo uLight[MAX_LIGHTS]; // The array of lights present in the scene
+uniform MaterialInfo uMaterial;  // The material of the object being drawn
 
 varying vec3 fViewer;
 varying vec3 fNormal;
@@ -40,24 +37,26 @@ void main()
 {
     vec3 total;
 
+    vec3 ka = vec3(uMaterial.Ka.x/250.0, uMaterial.Ka.y/250.0, uMaterial.Ka.z/250.0);
+    vec3 kd = vec3(uMaterial.Kd.x/250.0, uMaterial.Kd.y/250.0, uMaterial.Kd.z/250.0);
+    vec3 ks = vec3(uMaterial.Ks.x/250.0, uMaterial.Ks.y/250.0, uMaterial.Ks.z/250.0);
 
     for(int i = 0; i < MAX_LIGHTS;i++){
-        if(uLight[i].isActive){
         if(i == uNLights) break;
-        vec3 fLight;
-        if(uLight[i].isDirectional) 
-            fLight = normalize((mViewNormalsF * uLight[i].pos).xyz);
-        else 
-            fLight = normalize((mViewF * uLight[i].pos).xyz - fPosition);
-
+        vec3 fLight = normalize((mViewNormalsF * vec4(uLight[i].pos,1.0)).xyz - fPosition);
+    
         vec3 L = normalize(fLight);
         vec3 V = normalize(fViewer);
         vec3 N = normalize(fNormal);
-        vec3 H = normalize(L+V);    
+        vec3 H = normalize(L+V); 
 
-        vec3 ambientColor = uLight[i].Ia * uMaterial.Ka;
-        vec3 diffuseColor = uLight[i].Id * uMaterial.Kd;
-        vec3 specularColor = uLight[i].Is * uMaterial.Ks;
+        vec3 ia = vec3(uLight[i].Ia.x/255.0,uLight[i].Ia.y/255.0,uLight[i].Ia.z/255.0);
+        vec3 id = vec3(uLight[i].Id.x/255.0,uLight[i].Id.y/255.0,uLight[i].Id.z/255.0);
+        vec3 is = vec3(uLight[i].Is.x/255.0,uLight[i].Is.y/255.0,uLight[i].Is.z/255.0);
+    
+        vec3 ambientColor = ia * ka;
+        vec3 diffuseColor = id * kd;
+        vec3 specularColor = is * ks;
 
         float diffuseFactor = max (dot(L,N),0.0);
         vec3 diffuse = diffuseFactor * diffuseColor;
@@ -69,7 +68,7 @@ void main()
             specular = vec3(0.0,0.0,0.0);
         }
         total += ambientColor+diffuse+specular;
-        }
+
     }
 
     gl_FragColor = vec4(total, 1.0);
