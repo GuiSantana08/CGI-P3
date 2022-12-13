@@ -158,8 +158,9 @@ function main(shaders){
     ax1.add(lights[0].axis,0).name('x');
     ax1.add(lights[0].axis,1).name('y');
     ax1.add(lights[0].axis,2).name('z');
-    light1.add(lights[0], 'aperture',0,100);
-    light1.add(lights[0],'cutoff',0,100);
+    const spotlightOps1 = light1.addFolder('spotlightOps')
+    spotlightOps1.add(lights[0], 'aperture',0,100);
+    spotlightOps1.add(lights[0],'cutoff',0,100);
 
     //Light2
     const light2 = lightsFolder.addFolder('Light2');
@@ -178,8 +179,9 @@ function main(shaders){
     ax2.add(lights[1].axis,0).name('x');
     ax2.add(lights[1].axis,1).name('y');
     ax2.add(lights[1].axis,2).name('z');
-    light2.add(lights[1], 'aperture',0,100);
-    light2.add(lights[1],'cutoff',0,100);
+    const spotlightOps2 = light2.addFolder('spotlightOps')
+    spotlightOps2.add(lights[1], 'aperture',0,100);
+    spotlightOps2.add(lights[1],'cutoff',0,100);
 
     //Light3
     const light3 = lightsFolder.addFolder('Light3');
@@ -198,8 +200,9 @@ function main(shaders){
     ax3.add(lights[2].axis,0).name('x');
     ax3.add(lights[2].axis,1).name('y');
     ax3.add(lights[2].axis,2).name('z');
-    light3.add(lights[2], 'aperture',0,100);
-    light3.add(lights[2],'cutoff',0,100);
+    const spotlightOps3 = light3.addFolder('spotlightOps')
+    spotlightOps3.add(lights[2], 'aperture',0,100);
+    spotlightOps3.add(lights[2],'cutoff',0,100);
 
     //material
     materialFolder.addColor(bunnyMaterial, 'Ka');
@@ -245,9 +248,33 @@ function main(shaders){
     let lastX, lastY;
     let down = false;
 
+    function hideSpotLightOps(){
+        if(lights[0].type == 'spotlight'){
+            spotlightOps1.hide()
+        }
+        else{
+            spotlightOps1.show()
+        }
+        if(lights[1].type == 'spotlight'){
+            spotlightOps2.hide()
+        }
+        else{
+            spotlightOps2.show()
+        }
+        if(lights[2].type == 'spotlight'){
+            spotlightOps3.hide()
+        }
+        else{
+            spotlightOps3.show()
+        }
+    }
+
     function render()
     {
         window.requestAnimationFrame(render);
+
+        hideSpotLightOps();
+
 
         mView = lookAt( camera.eye, camera.at, camera.up);
         mProjection = perspective(camera.fovy, aspect, camera.near, camera.far);
