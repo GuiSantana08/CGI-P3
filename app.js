@@ -247,6 +247,14 @@ function main(shaders){
         
         STACK.loadMatrix(mView);
     
+        if(options["backface culling"]){
+            gl.enable(gl.CULL_FACE);
+        }
+        else gl.disable(gl.CULL_FACE);
+
+        if(options["depth test"]){
+            gl.enable(gl.DEPTH_TEST);
+        }else gl.disable(gl.DEPTH_TEST);
 
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mProjection"), false, flatten(mProjection));
@@ -325,8 +333,9 @@ function main(shaders){
             gl.uniform3fv(gl.getUniformLocation(program, "uLight[" + i +"].Id"),diffuse);
             gl.uniform3fv(gl.getUniformLocation(program, "uLight[" + i +"].Is"),specular);
             gl.uniform4fv(gl.getUniformLocation(program, "uLight[" + i +"].pos"),lights[i].position);
-            gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isDirectional"), lights[i].directional);
-            gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isActive"), lights[i].active);
+            gl.uniform4fv(gl.getUniformLocation(program, "uLight[" + i +"].axis"),lights[i].axis);
+            gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].aperture"), lights[i].aperture);
+            gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].cutoff"), lights[i].cutoff);
     
         }
 
