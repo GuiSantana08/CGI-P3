@@ -32,7 +32,7 @@ function main(shaders){
             aperture: 10.0,
             cutoff:10,
             active: true,
-            type: 'directional'
+            type: 'pontual'
         },
         {
             ambient: [50, 0, 0],
@@ -54,7 +54,7 @@ function main(shaders){
             aperture: 180.0,
             cutoff: -1,
             active: true,
-            type: 'spotlight'
+            type: 'pontual'
         }
     ];
 
@@ -107,7 +107,6 @@ function main(shaders){
     let gl = setupWebGL(canvas);
 
     let programP = buildProgramFromSources(gl, shaders["shader.vert"], shaders["shader.frag"]);
-    let programG = buildProgramFromSources(gl, shaders["shader.vert"], shaders["shader.frag"]); //VER A DIFERENÇA
 
     const program = programP;
 
@@ -234,7 +233,7 @@ function main(shaders){
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        camera.aspect = canvas.width / canvas.height;
+        aspect = canvas.width / canvas.height;
 
         gl.viewport(0,0,canvas.width, canvas.height);
     }
@@ -250,22 +249,22 @@ function main(shaders){
 
     function hideSpotLightOps(){
         if(lights[0].type == 'spotlight'){
-            spotlightOps1.hide()
-        }
-        else{
             spotlightOps1.show()
         }
-        if(lights[1].type == 'spotlight'){
-            spotlightOps2.hide()
-        }
         else{
+            spotlightOps1.hide()
+        }
+        if(lights[1].type == 'spotlight'){
             spotlightOps2.show()
         }
+        else{
+            spotlightOps2.hide()
+        }
         if(lights[2].type == 'spotlight'){
-            spotlightOps3.hide()
+            spotlightOps3.show()
         }
         else{
-            spotlightOps3.show()
+            spotlightOps3.hide()
         }
     }
 

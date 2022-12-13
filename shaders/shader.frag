@@ -45,10 +45,15 @@ void main()
     vec3 ks = vec3(uMaterial.Ks.x/250.0, uMaterial.Ks.y/250.0, uMaterial.Ks.z/250.0);
 
     for(int i = 0; i < MAX_LIGHTS;i++){
+        if(i == uNLights) break;
         if(uLight[i].isActive){
-            if(i == uNLights) break;
-            vec3 fLight = normalize((mViewNormalsF * vec4(uLight[i].pos,1.0)).xyz - fPosition);
-        
+            vec3 fLight;
+            if(uLight[i].isDirectional)
+                fLight = normalize((mViewNormalsF * vec4(uLight[i].pos,1.0)).xyz);
+            else
+                fLight = normalize((mViewNormalsF * vec4(uLight[i].pos,1.0)).xyz - fPosition);
+
+
             vec3 L = normalize(fLight);
             vec3 V = normalize(fViewer);
             vec3 N = normalize(fNormal);
