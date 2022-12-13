@@ -31,9 +31,8 @@ function main(shaders){
             axis: [0.0,0.0,-1.0],
             aperture: 10.0,
             cutoff:10,
-            directional: true,
-            active: false,
-            spotlight: false
+            active: true,
+            type: 'directional'
         },
         {
             ambient: [50, 0, 0],
@@ -43,9 +42,8 @@ function main(shaders){
             axis: [20.0, -5.0, -5.0],
             aperture: 180.0,
             cutoff: -1,
-            directional: false,
             active: true,
-            spotlight: false
+            type: 'pontual'
         },
         {
             ambient: [75, 75, 100],
@@ -55,9 +53,8 @@ function main(shaders){
             axis: [-5.0, -5.0, -2.0],
             aperture: 180.0,
             cutoff: -1,
-            directional: false,
-            active: false,
-            spotlight: true
+            active: true,
+            type: 'spotlight'
         }
     ];
 
@@ -146,6 +143,8 @@ function main(shaders){
     //lights
     //Light1
     const light1 = lightsFolder.addFolder('Light1');
+    light1.add(lights[0],'active');
+    light1.add(lights[0], 'type', ['directional','pontual','spotlight']);
     const pos1 = light1.addFolder('position');
     pos1.add(lights[0].position,0).name('x');
     pos1.add(lights[0].position,1).name('y');
@@ -164,6 +163,8 @@ function main(shaders){
 
     //Light2
     const light2 = lightsFolder.addFolder('Light2');
+    light2.add(lights[1],'active');
+    light2.add(lights[1], 'type', ['directional','pontual','spotlight']);
     const pos2 = light2.addFolder('position');
     pos2.add(lights[1].position,0).name('x');
     pos2.add(lights[1].position,1).name('y');
@@ -182,6 +183,8 @@ function main(shaders){
 
     //Light3
     const light3 = lightsFolder.addFolder('Light3');
+    light3.add(lights[2],'active');
+    light3.add(lights[2], 'type', ['directional','pontual','spotlight']);
     const pos3 = light3.addFolder('position');
     pos3.add(lights[2].position,0).name('x');
     pos3.add(lights[2].position,1).name('y');
@@ -347,6 +350,19 @@ function main(shaders){
             gl.uniform4fv(gl.getUniformLocation(program, "uLight[" + i +"].axis"),lights[i].axis);
             gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].aperture"), lights[i].aperture);
             gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].cutoff"), lights[i].cutoff);
+            gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isActive"), lights[i].active);
+            if(lights[i].type == 'directional'){
+                gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isDirectional"), true);
+                gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isSpotLight"), false);
+            }
+            else if(lights[i].type == 'pontual'){
+                gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isDirectional"), false);
+                gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isSpotLight"), false);
+            }
+            else {
+                gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isDirectional"), false);
+                gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isSpotLight"), true);
+            }
     
         }
 
