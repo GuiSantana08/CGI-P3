@@ -31,9 +31,8 @@ function main(shaders){
             axis: [0.0,0.0,-1.0],
             aperture: 10.0,
             cutoff:10,
-            directional: true,
-            active: false,
-            spotlight: false
+            active: true,
+            type: 'x'
         },
         {
             ambient: [50, 0, 0],
@@ -43,9 +42,8 @@ function main(shaders){
             axis: [20.0, -5.0, -5.0],
             aperture: 180.0,
             cutoff: -1,
-            directional: false,
             active: true,
-            spotlight: false
+            type: 'x'
         },
         {
             ambient: [75, 75, 100],
@@ -55,9 +53,8 @@ function main(shaders){
             axis: [-5.0, -5.0, -2.0],
             aperture: 180.0,
             cutoff: -1,
-            directional: false,
-            active: false,
-            spotlight: true
+            active: true,
+            type: 'x'
         }
     ];
 
@@ -210,7 +207,6 @@ function main(shaders){
     gl.clearColor(0, 0, 0, 1.0); //cor de fundo
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
-    //gl.enable(gl.BACK);
 
     resizeCanvasToFullWindow();
     window.addEventListener('resize', resizeCanvasToFullWindow);
@@ -292,10 +288,10 @@ function main(shaders){
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ks"),cubeMaterial.Ks );
         gl.uniform1f(gl.getUniformLocation(program,"uMaterial.shininess"),cubeMaterial.shininess);
         STACK.pushMatrix();
-            STACK.multTranslation([-2.5,0.5,-2.5]);
+            STACK.multTranslation([-2.5, 1,-2.5]);
             STACK.multScale([2,2,2])
             gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
-            CUBE.draw(gl,program,gl.TRIANGLES);
+            CUBE.draw(gl,program,mode);
         STACK.popMatrix();
         
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ka"),cylinderMaterial.Ka );
@@ -303,10 +299,10 @@ function main(shaders){
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ks"),cylinderMaterial.Ks );
         gl.uniform1f(gl.getUniformLocation(program,"uMaterial.shininess"),cylinderMaterial.shininess);
         STACK.pushMatrix();
-            STACK.multTranslation([2.5,0.5,-2.5]);
+            STACK.multTranslation([2.5,1,-2.5]);
             STACK.multScale([2,2,2])
             gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
-            CYLINDER.draw(gl,program,gl.TRIANGLES);
+            CYLINDER.draw(gl,program,mode);
         STACK.popMatrix();
         
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ka"),torusMaterial.Ka );
@@ -314,10 +310,10 @@ function main(shaders){
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ks"),torusMaterial.Ks );
         gl.uniform1f(gl.getUniformLocation(program,"uMaterial.shininess"),torusMaterial.shininess);
         STACK.pushMatrix();
-            STACK.multTranslation([-2.5,0.5,2.5]);
+            STACK.multTranslation([-2.5,0.4,2.5]);
             STACK.multScale([2,2,2])
             gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
-            TORUS.draw(gl,program,gl.TRIANGLES);
+            TORUS.draw(gl,program, mode);
         STACK.popMatrix();
         
 
@@ -326,10 +322,10 @@ function main(shaders){
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ks"),bunnyMaterial.Ks);
         gl.uniform1f(gl.getUniformLocation(program,"uMaterial.shininess"),bunnyMaterial.shininess);
         STACK.pushMatrix();
-            STACK.multTranslation([2.5,0.5,2.5]);
+            STACK.multTranslation([2.5,0,2.5]);
             STACK.multScale([12,12,12]);
             gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
-            BUNNY.draw(gl,program,gl.TRIANGLES);
+            BUNNY.draw(gl,program,mode);
             STACK.popMatrix();
         STACK.popMatrix()
 
@@ -347,7 +343,8 @@ function main(shaders){
             gl.uniform4fv(gl.getUniformLocation(program, "uLight[" + i +"].axis"),lights[i].axis);
             gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].aperture"), lights[i].aperture);
             gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].cutoff"), lights[i].cutoff);
-    
+            gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isActive"), lights[i].active);
+            
         }
 
 
