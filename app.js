@@ -250,7 +250,7 @@ function main(shaders){
             currentMouseDown = currentCursorPos;
             if(event.ctrlKey){
                 camera.eye[1] += move[1]; 
-                camera.eye[2] -= move[0]; //altera no Z  
+                camera.eye[2] += move[0]; //altera no Z  
             }else{
                 if(camera.eye[2] < 0)
                     camera.eye[0] -= move[0];  // altera no X
