@@ -257,12 +257,13 @@ function main(shaders){
         if(event.altKey && isDown){
             currentCursorPos = getCursorPosition(canvas, event);
             let move = getMove(currentMouseDown, currentCursorPos)
+            console.log(move)
             currentMouseDown = currentCursorPos;
             if(event.ctrlKey){
-                camera.eye[1] += move[1]; //altera no X
-                camera.eye[2] += move[0];
+                camera.eye[1] += move[1]; 
+                camera.eye[2] -= move[0]; //altera no Z  
             }else{
-                camera.eye[0] += move[0];  // altera no Z
+                camera.eye[0] += move[0];  // altera no X
                 camera.eye[1] += move[1];
             }
         }
@@ -381,12 +382,14 @@ function main(shaders){
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Kd"),lightMaterial.Kd);
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ks"),lightMaterial.Ks);
         gl.uniform1f(gl.getUniformLocation(program,"uMaterial.shininess"),lightMaterial.shininess);
-        STACK.pushMatrix();
-        STACK.multTranslation(vec3(lights[2].position))
-        STACK.multScale([0.1,0.1,0.1]);
-        gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
-        SPHERE.draw(gl, program, gl.LINES);
-        STACK.popMatrix();
+        for(let i = 0; i < lights.length; i++){
+            STACK.pushMatrix();
+            STACK.multTranslation(vec3(lights[i].position))
+            STACK.multScale([0.1,0.1,0.1]);
+            gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
+            SPHERE.draw(gl, program, gl.LINES);
+            STACK.popMatrix();
+        }
 
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ka"),bunnyMaterial.Ka);
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Kd"),bunnyMaterial.Kd);
