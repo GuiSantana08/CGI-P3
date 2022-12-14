@@ -11,10 +11,6 @@ import * as BUNNY from '../../libs/objects/bunny.js';
 
 import * as STACK from '../../libs/stack.js';
 
-const TYPE_PONTUAL = 0;
-const TYPE_DIRECTIONAL = 1;
-const TYPE_SPOTLIGHT = 2;
-
 let currentCursorPos = vec2(0.0,0.0);
 let currentMouseDown = vec2(0.0,0.0);
 let isDown = false;
@@ -37,7 +33,7 @@ function main(shaders){
             specular: [200,200,200],
             position: [0.0, 0.0, 10.0, 1.0],
             axis: [0.0,0.0,-1.0],
-            aperture: 6.1,
+            aperture: 5.0,
             cutoff:10.0,
             active: true,
             spotlight: true
@@ -49,7 +45,7 @@ function main(shaders){
             position: [-20.0, 5.0, 5.0, 0.0],
             axis: [20.0, -5.0, -5.0],
             aperture: 180.0,
-            cutoff: -2,
+            cutoff: -1,
             active: true,
             spotlight: false
         },
@@ -108,7 +104,6 @@ function main(shaders){
         shininess: 50.0
     }
 
-    //Visualization options
     let options = {
         'backface culling': true,
         'depth test': true
@@ -132,12 +127,11 @@ function main(shaders){
     const materialFolder = gui.addFolder('material');
 
     //options
-    optionsFolder.add(options, 'backface culling',false,true);
-    optionsFolder.add(options, 'depth test',0,100);
-
+    optionsFolder.add(options, 'backface culling');
+    optionsFolder.add(options, 'depth test');
 
     //camera
-    cameraFolder.add(camera, 'fovy', 0, 100);
+    cameraFolder.add(camera, 'fovy', 0.1, 100);
     cameraFolder.add(camera, 'near' , 0.1, 20);
     cameraFolder.add(camera, 'far' , 0.1, 20);
     const eyeFolder = cameraFolder.addFolder('eye');
@@ -156,7 +150,6 @@ function main(shaders){
     upFolder.add(camera.up, 2).name('z');
 
     //lights
-    //Light1
     for(let i =0; i<lights.length; i++){
         const light = lightsFolder.addFolder('Light' + (i+1));
         light.add(lights[i],'active');
@@ -174,11 +167,10 @@ function main(shaders){
         ax.add(lights[i].axis,0).name('x');
         ax.add(lights[i].axis,1).name('y');
         ax.add(lights[i].axis,2).name('z');
-        light.add(lights[i], 'aperture',0,100);
+        light.add(lights[i], 'aperture',0,180);
         light.add(lights[i],'cutoff',0,100);
     }
     
-
     //material
     materialFolder.addColor(bunnyMaterial, 'Ka');
     materialFolder.addColor(bunnyMaterial,'Kd');
@@ -188,7 +180,7 @@ function main(shaders){
 
 
     gl.viewport(0,0,canvas.width, canvas.height);
-    gl.clearColor(0,0,0, 1.0); //cor de fundo
+    gl.clearColor(0,0,0, 1.0);
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
 
@@ -239,9 +231,6 @@ function main(shaders){
         const yD = yMD - yMM;
 
         return vec2(xD/100, yD/100)
-
-
-
 
     }
 
@@ -303,8 +292,6 @@ function main(shaders){
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mView"), false, flatten(mView));
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mViewNormals"), false, flatten(normalMatrix(mView)));
         gl.uniform1i(gl.getUniformLocation(program,"uNLights"),lights.length);
-    
-
         
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ka"),groundMaterial.Ka );
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Kd"),groundMaterial.Kd );
@@ -351,7 +338,6 @@ function main(shaders){
             TORUS.draw(gl,program, mode);
         STACK.popMatrix();
         
-
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ka"),lightMaterial.Ka);
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Kd"),lightMaterial.Kd);
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ks"),lightMaterial.Ks);
@@ -376,16 +362,10 @@ function main(shaders){
             BUNNY.draw(gl,program,mode);
         STACK.popMatrix()
 
-
-    
-
-
         for(let i = 0; i < lights.length; i++){
             let ambient = vec3(lights[i].ambient[0], lights[i].ambient[1],lights[i].ambient[2]);
             let diffuse = vec3(lights[i].diffuse[0], lights[i].diffuse[1],lights[i].diffuse[2]);
             let specular = vec3(lights[i].specular[0], lights[i].specular[1],lights[i].specular[2]);
-        
-                
             gl.uniform4fv(gl.getUniformLocation(program, "uLight[" + i +"].pos"),lights[i].position);
             gl.uniform3fv(gl.getUniformLocation(program, "uLight[" + i +"].axis"),lights[i].axis);
             gl.uniform3fv(gl.getUniformLocation(program, "uLight[" + i +"].Ia"),ambient);
@@ -397,8 +377,6 @@ function main(shaders){
             gl.uniform1f(gl.getUniformLocation(program, "uLight[" + i +"].spotlight"),lights[i].spotlight)
 
         }
-
-
         
     }
     
