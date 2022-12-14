@@ -246,7 +246,6 @@ function main(shaders){
         if(isDown){
             currentCursorPos = getCursorPosition(canvas, event);
             let move = getMove(currentMouseDown, currentCursorPos)
-            console.log(camera.eye)
             currentMouseDown = currentCursorPos;
             if(event.ctrlKey){
                 camera.eye[1] += move[1]; 
