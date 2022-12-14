@@ -11,6 +11,9 @@ import * as BUNNY from '../../libs/objects/bunny.js';
 
 import * as STACK from '../../libs/stack.js';
 
+const MAX_X_Z = 45
+const MAX_Y = 42
+
 let currentCursorPos = vec2(0.0,0.0);
 let currentMouseDown = vec2(0.0,0.0);
 let isDown = false;
@@ -235,23 +238,24 @@ function main(shaders){
     }
 
     canvas.addEventListener("mousedown", function(event) {
-        if(event.altKey || event.shiftKey) {
-            isDown = true
-            currentMouseDown = getCursorPosition(canvas, event);
-        }
+        isDown = true
+        currentMouseDown = getCursorPosition(canvas, event);
     });
     
     canvas.addEventListener("mousemove", function(event) {
-        if(event.altKey && isDown){
+        if(isDown){
             currentCursorPos = getCursorPosition(canvas, event);
             let move = getMove(currentMouseDown, currentCursorPos)
-            console.log(move)
+            console.log(camera.eye)
             currentMouseDown = currentCursorPos;
             if(event.ctrlKey){
                 camera.eye[1] += move[1]; 
                 camera.eye[2] -= move[0]; //altera no Z  
             }else{
-                camera.eye[0] += move[0];  // altera no X
+                if(camera.eye[2] < 0)
+                    camera.eye[0] -= move[0];  // altera no X
+                else
+                    camera.eye[0] += move[0];
                 camera.eye[1] += move[1];
             }
         }
