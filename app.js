@@ -416,7 +416,7 @@ function main(shaders){
             gl.uniform3fv(gl.getUniformLocation(program, "uLight[" + i +"].Id"),diffuse);
             gl.uniform3fv(gl.getUniformLocation(program, "uLight[" + i +"].Is"),specular);
             gl.uniform4fv(gl.getUniformLocation(program, "uLight[" + i +"].pos"),lights[i].position);
-            gl.uniform4fv(gl.getUniformLocation(program, "uLight[" + i +"].axis"),lights[i].axis);
+            gl.uniform3fv(gl.getUniformLocation(program, "uLight[" + i +"].axis"),lights[i].axis);
             gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].aperture"), lights[i].aperture);
             gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].cutoff"), lights[i].cutoff);
             gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isActive"), lights[i].active);
