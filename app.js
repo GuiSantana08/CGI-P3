@@ -35,21 +35,21 @@ function main(shaders){
             ambient: [50, 50, 50],
             diffuse: [60,60,60],
             specular: [200,200,200],
-            position: [0, 0.0, 2.0, 1.0],
+            position: [0.0, 0.0, 10.0, 1.0],
             axis: [0.0,0.0,-1.0],
             aperture: 10.0,
-            cutoff:10,
+            cutoff:10.0,
             active: true,
-            spotlight: false
+            spotlight: true
         },
         {
             ambient: [50, 0, 0],
             diffuse: [50, 0.0, 0.0],
             specular: [150, 0.0, 0.0],
-            position: [-20, 5.0, 5.0, 0.0],
+            position: [-20.0, 5.0, 5.0, 0.0],
             axis: [20.0, -5.0, -5.0],
             aperture: 180.0,
-            cutoff: -1,
+            cutoff: -2,
             active: true,
             spotlight: false
         },
@@ -58,11 +58,11 @@ function main(shaders){
             diffuse: [75, 75, 100],
             specular: [150, 150, 175],
             position: [5.0, 5.0, 2.0, 1.0],
-            axis: [-5.0, -5.0, -2.0],
+            axis: [-5.0, 5.0, -2.0],
             aperture: 180.0,
             cutoff: -1,
             active: true,
-            spotlight: true
+            spotlight: false
         }
     ];
 
@@ -189,7 +189,7 @@ function main(shaders){
 
 
     gl.viewport(0,0,canvas.width, canvas.height);
-    gl.clearColor(0, 0, 0, 1.0); //cor de fundo
+    gl.clearColor(1, 1, 1, 1.0); //cor de fundo
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
 
@@ -274,30 +274,6 @@ function main(shaders){
     });
 
 
-
-
-
-    function hideSpotLightOps(){
-        if(lights[0].type == 'spotlight'){
-            spotlightOps1.show()
-        }
-        else{
-            spotlightOps1.hide()
-        }
-        if(lights[1].type == 'spotlight'){
-            spotlightOps2.show()
-        }
-        else{
-            spotlightOps2.hide()
-        }
-        if(lights[2].type == 'spotlight'){
-            spotlightOps3.show()
-        }
-        else{
-            spotlightOps3.hide()
-        }
-    }
-
     function render()
     {
 
@@ -322,14 +298,13 @@ function main(shaders){
             gl.enable(gl.DEPTH_TEST);
         }else gl.disable(gl.DEPTH_TEST);
 
-        gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mProjection"), false, flatten(mProjection));
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mNormals"), false, flatten(normalMatrix(STACK.modelView())));
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mView"), false, flatten(mView));
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mViewNormals"), false, flatten(normalMatrix(mView)));
         gl.uniform1i(gl.getUniformLocation(program,"uNLights"),lights.length);
-        gl.uniformMatrix4fv(gl.getUniformLocation(program, "mViewF"), false, flatten(mView));
-        gl.uniformMatrix4fv(gl.getUniformLocation(program, "mViewNormalsF"), false, flatten(normalMatrix(mView)));
+    
 
         
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ka"),groundMaterial.Ka );
@@ -412,13 +387,13 @@ function main(shaders){
             let specular = vec3(lights[i].specular[0], lights[i].specular[1],lights[i].specular[2]);
         
                 
+            gl.uniform4fv(gl.getUniformLocation(program, "uLight[" + i +"].pos"),lights[i].position);
+            gl.uniform3fv(gl.getUniformLocation(program, "uLight[" + i +"].axis"),lights[i].axis);
             gl.uniform3fv(gl.getUniformLocation(program, "uLight[" + i +"].Ia"),ambient);
             gl.uniform3fv(gl.getUniformLocation(program, "uLight[" + i +"].Id"),diffuse);
             gl.uniform3fv(gl.getUniformLocation(program, "uLight[" + i +"].Is"),specular);
-            gl.uniform4fv(gl.getUniformLocation(program, "uLight[" + i +"].pos"),lights[i].position);
-            gl.uniform3fv(gl.getUniformLocation(program, "uLight[" + i +"].axis"),lights[i].axis);
-            gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].aperture"), lights[i].aperture);
-            gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].cutoff"), lights[i].cutoff);
+            gl.uniform1f(gl.getUniformLocation(program, "uLight[" + i +"].aperture"), lights[i].aperture);
+            gl.uniform1f(gl.getUniformLocation(program, "uLight[" + i +"].cutoff"), lights[i].cutoff);
             gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isActive"), lights[i].active);
             gl.uniform1f(gl.getUniformLocation(program, "uLight[" + i +"].spotlight"),lights[i].spotlight)
 
