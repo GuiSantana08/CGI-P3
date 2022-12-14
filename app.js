@@ -37,7 +37,7 @@ function main(shaders){
             specular: [200,200,200],
             position: [0.0, 0.0, 10.0, 1.0],
             axis: [0.0,0.0,-1.0],
-            aperture: 10.0,
+            aperture: 6.1,
             cutoff:10.0,
             active: true,
             spotlight: true
@@ -174,9 +174,8 @@ function main(shaders){
         ax.add(lights[i].axis,0).name('x');
         ax.add(lights[i].axis,1).name('y');
         ax.add(lights[i].axis,2).name('z');
-        const spotLightOps = light.addFolder('spotlightOps')
-        spotLightOps.add(lights[i], 'aperture',0,100);
-        spotLightOps.add(lights[i],'cutoff',0,100);
+        light.add(lights[i], 'aperture',0,100);
+        light.add(lights[i],'cutoff',0,100);
     }
     
 
@@ -189,7 +188,7 @@ function main(shaders){
 
 
     gl.viewport(0,0,canvas.width, canvas.height);
-    gl.clearColor(1, 1, 1, 1.0); //cor de fundo
+    gl.clearColor(0,0,0, 1.0); //cor de fundo
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
 

@@ -42,13 +42,6 @@ varying vec3 fViewer;
 varying vec3 fNormal;
 varying vec3 fPosition;
 
-float spotlightFunction(LightInfo light) {
-    vec3 fragToLight = light.pos.xyz - fPosition;
-    float alfa = acos(dot(normalize(fragToLight),normalize(light.axis))); 
-    return (180.0*alfa)/PI;
-    
-}
-
 void main() {
     vec3 total;
 
@@ -90,13 +83,14 @@ void main() {
 
             if(uLight[i].spotlight == true){
                 vec3 lightDirection = normalize((vec4(uLight[i].pos)).xyz - fPosition);
-                float angle = acos(dot(lightDirection, normalize(uLight[i].axis)));
-                
+                float angle = acos(dot(lightDirection, normalize(-uLight[i].axis)));
+                angle = (180.0*angle)/PI;
+
                 if(angle > uLight[i].aperture){
                     total += vec3(0,0,0);
                 }
                 else {
-                    total += pow(cos((180.0*angle)/PI), uLight[i].cutoff) * (ambientColor + /*attenuatio*/ (diffuse + specular));
+                    total += pow(cos((PI*angle)/180.0), uLight[i].cutoff) * (ambientColor + diffuse + specular);
                 }
             }
             else{
