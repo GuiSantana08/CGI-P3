@@ -5,15 +5,15 @@ uniform bool uUseNormals;
 const int MAX_LIGHTS = 4;
 
 struct LightInfo {
-    vec3 pos;
+    vec4 pos;
+    vec3 axis;
     vec3 Ia;
     vec3 Id;
     vec3 Is;
     float aperture;
     float cutoff;
     bool isActive;
-    bool isDirectional;
-    bool isSpotLight;
+    bool spotlight;
 };
 
 struct MaterialInfo {
@@ -48,11 +48,15 @@ void main()
         if(i == uNLights) break;
         if(uLight[i].isActive){
             vec3 fLight;
-            if(uLight[i].isDirectional)
-                fLight = normalize((mViewNormalsF * vec4(uLight[i].pos,1.0)).xyz);
-            else
-                fLight = normalize((mViewNormalsF * vec4(uLight[i].pos,1.0)).xyz - fPosition);
+            if(uLight[i].spotlight == true){
 
+            }
+            else{
+                if(uLight[i].pos.w == 0.0)
+                    fLight = normalize((mViewNormalsF * vec4(uLight[i].pos)).xyz);
+                else
+                    fLight = normalize((mViewF * vec4(uLight[i].pos)).xyz - fPosition);
+            }
 
             vec3 L = normalize(fLight);
             vec3 V = normalize(fViewer);
@@ -73,9 +77,6 @@ void main()
             float specularFactor = pow(max (dot(N,H),0.0),uMaterial.shininess);
             vec3 specular = specularFactor * specularColor;
 
-            if (dot(L,N) < 0.0){
-                specular = vec3(0.0,0.0,0.0);
-            }
             total += ambientColor+diffuse+specular;
         }
 

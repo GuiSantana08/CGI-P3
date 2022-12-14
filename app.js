@@ -11,6 +11,10 @@ import * as BUNNY from '../../libs/objects/bunny.js';
 
 import * as STACK from '../../libs/stack.js';
 
+const TYPE_PONTUAL = 0;
+const TYPE_DIRECTIONAL = 1;
+const TYPE_SPOTLIGHT = 2;
+
 let currentCursorPos = vec2(0.0,0.0);
 let currentMouseDown = vec2(0.0,0.0);
 let isDown = false;
@@ -36,7 +40,7 @@ function main(shaders){
             aperture: 10.0,
             cutoff:10,
             active: true,
-            type: 'pontual'
+            spotlight: false
         },
         {
             ambient: [50, 0, 0],
@@ -47,7 +51,7 @@ function main(shaders){
             aperture: 180.0,
             cutoff: -1,
             active: true,
-            type: 'pontual'
+            spotlight: false
         },
         {
             ambient: [75, 75, 100],
@@ -58,7 +62,7 @@ function main(shaders){
             aperture: 180.0,
             cutoff: -1,
             active: true,
-            type: 'pontual'
+            spotlight: true
         }
     ];
 
@@ -131,6 +135,7 @@ function main(shaders){
     optionsFolder.add(options, 'backface culling',false,true);
     optionsFolder.add(options, 'depth test',0,100);
 
+
     //camera
     cameraFolder.add(camera, 'fovy', 0, 100);
     cameraFolder.add(camera, 'near' , 0.1, 20);
@@ -152,67 +157,28 @@ function main(shaders){
 
     //lights
     //Light1
-    const light1 = lightsFolder.addFolder('Light1');
-    light1.add(lights[0],'active');
-    light1.add(lights[0], 'type', ['directional','pontual','spotlight']);
-    const pos1 = light1.addFolder('position');
-    pos1.add(lights[0].position,0).name('x');
-    pos1.add(lights[0].position,1).name('y');
-    pos1.add(lights[0].position,2).name('z');
-    pos1.add(lights[0].position,3).name('w');
-    const intens1 = light1.addFolder('intensities');
-    intens1.addColor(lights[0], "ambient");
-    intens1.addColor(lights[0], "diffuse");
-    intens1.addColor(lights[0], "specular");
-    const ax1 = light1.addFolder('axis');
-    ax1.add(lights[0].axis,0).name('x');
-    ax1.add(lights[0].axis,1).name('y');
-    ax1.add(lights[0].axis,2).name('z');
-    const spotlightOps1 = light1.addFolder('spotlightOps')
-    spotlightOps1.add(lights[0], 'aperture',0,100);
-    spotlightOps1.add(lights[0],'cutoff',0,100);
-
-    //Light2
-    const light2 = lightsFolder.addFolder('Light2');
-    light2.add(lights[1],'active');
-    light2.add(lights[1], 'type', ['directional','pontual','spotlight']);
-    const pos2 = light2.addFolder('position');
-    pos2.add(lights[1].position,0).name('x');
-    pos2.add(lights[1].position,1).name('y');
-    pos2.add(lights[1].position,2).name('z');
-    pos2.add(lights[1].position,3).name('w');
-    const intens2 = light2.addFolder('intensities');
-    intens2.addColor(lights[1], "ambient");
-    intens2.addColor(lights[1], "diffuse");
-    intens2.addColor(lights[1], "specular");
-    const ax2 = light2.addFolder('axis');
-    ax2.add(lights[1].axis,0).name('x');
-    ax2.add(lights[1].axis,1).name('y');
-    ax2.add(lights[1].axis,2).name('z');
-    const spotlightOps2 = light2.addFolder('spotlightOps')
-    spotlightOps2.add(lights[1], 'aperture',0,100);
-    spotlightOps2.add(lights[1],'cutoff',0,100);
-
-    //Light3
-    const light3 = lightsFolder.addFolder('Light3');
-    light3.add(lights[2],'active');
-    light3.add(lights[2], 'type', ['directional','pontual','spotlight']);
-    const pos3 = light3.addFolder('position');
-    pos3.add(lights[2].position,0).name('x');
-    pos3.add(lights[2].position,1).name('y');
-    pos3.add(lights[2].position,2).name('z');
-    pos3.add(lights[2].position,3).name('w');
-    const intens3 = light3.addFolder('intensities');
-    intens3.addColor(lights[2], "ambient");
-    intens3.addColor(lights[2], "diffuse");
-    intens3.addColor(lights[2], "specular");
-    const ax3 = light3.addFolder('axis');
-    ax3.add(lights[2].axis,0).name('x');
-    ax3.add(lights[2].axis,1).name('y');
-    ax3.add(lights[2].axis,2).name('z');
-    const spotlightOps3 = light3.addFolder('spotlightOps')
-    spotlightOps3.add(lights[2], 'aperture',0,100);
-    spotlightOps3.add(lights[2],'cutoff',0,100);
+    for(let i =0; i<lights.length; i++){
+        const light = lightsFolder.addFolder('Light' + (i+1));
+        light.add(lights[i],'active');
+        light.add(lights[i], 'spotlight');
+        const pos = light.addFolder('position');
+        pos.add(lights[i].position,0).name('x');
+        pos.add(lights[i].position,1).name('y');
+        pos.add(lights[i].position,2).name('z');
+        pos.add(lights[i].position,3).name('w');
+        const intens = light.addFolder('intensities');
+        intens.addColor(lights[i], "ambient");
+        intens.addColor(lights[i], "diffuse");
+        intens.addColor(lights[i], "specular");
+        const ax = light.addFolder('axis');
+        ax.add(lights[i].axis,0).name('x');
+        ax.add(lights[i].axis,1).name('y');
+        ax.add(lights[i].axis,2).name('z');
+        const spotLightOps = light.addFolder('spotlightOps')
+        spotLightOps.add(lights[i], 'aperture',0,100);
+        spotLightOps.add(lights[i],'cutoff',0,100);
+    }
+    
 
     //material
     materialFolder.addColor(bunnyMaterial, 'Ka');
@@ -336,8 +302,6 @@ function main(shaders){
 
         window.requestAnimationFrame(render);
 
-        hideSpotLightOps();
-
 
         mView = lookAt( camera.eye, camera.at, camera.up);
         mProjection = perspective(camera.fovy, aspect, camera.near, camera.far);
@@ -453,19 +417,8 @@ function main(shaders){
             gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].aperture"), lights[i].aperture);
             gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].cutoff"), lights[i].cutoff);
             gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isActive"), lights[i].active);
-            if(lights[i].type == 'directional'){
-                gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isDirectional"), true);
-                gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isSpotLight"), false);
-            }
-            else if(lights[i].type == 'pontual'){
-                gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isDirectional"), false);
-                gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isSpotLight"), false);
-            }
-            else {
-                gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isDirectional"), false);
-                gl.uniform1i(gl.getUniformLocation(program, "uLight[" + i +"].isSpotLight"), true);
-            }
-    
+            gl.uniform1f(gl.getUniformLocation(program, "uLight[" + i +"].spotlight"),lights[i].spotlight)
+
         }
 
 
