@@ -2,7 +2,8 @@ precision highp float;
 
 uniform bool uUseNormals;
 
-const int MAX_LIGHTS = 4;
+const int MAX_LIGHTS = 10;
+const float PI = 3.141592653589793;
 
 struct LightInfo {
     vec4 pos;
@@ -16,6 +17,11 @@ struct LightInfo {
     bool spotlight;
 };
 
+// Utilizar a psoção da luz pos -fPosição
+// utilizar a direção da luz axis
+//calcular o angulo entre os dois vetores (axis,(pos -fPosição))
+// ver se é maior ou menor que a abertura
+//converter os graus do angulo em radianos
 struct MaterialInfo {
     vec3 Ka;
     vec3 Kd;
@@ -36,8 +42,14 @@ varying vec3 fViewer;
 varying vec3 fNormal;
 varying vec3 fPosition;
 
-void main()
-{
+float spotlightFunction(LightInfo light) {
+    vec3 fragToLight = light.pos.xyz - fPosition;
+    float alfa = acos(dot(normalize(fragToLight),normalize(light.axis))); 
+    return (180.0*alfa)/PI;
+    
+}
+
+void main() {
     vec3 total;
 
     vec3 ka = vec3(uMaterial.Ka.x/250.0, uMaterial.Ka.y/250.0, uMaterial.Ka.z/250.0);
@@ -48,15 +60,14 @@ void main()
         if(i == uNLights) break;
         if(uLight[i].isActive){
             vec3 fLight;
-            if(uLight[i].spotlight == true){
+           
+            if(uLight[i].pos.w == 0.0)
+                fLight = normalize((mViewNormalsF * vec4(uLight[i].pos)).xyz);
+            else
+                fLight = normalize((mViewF * vec4(uLight[i].pos)).xyz - fPosition);
 
-            }
-            else{
-                if(uLight[i].pos.w == 0.0)
-                    fLight = normalize((mViewNormalsF * vec4(uLight[i].pos)).xyz);
-                else
-                    fLight = normalize((mViewF * vec4(uLight[i].pos)).xyz - fPosition);
-            }
+
+            //Meter lá para baixo a condição da spotlight
 
             vec3 L = normalize(fLight);
             vec3 V = normalize(fViewer);
@@ -77,7 +88,22 @@ void main()
             float specularFactor = pow(max (dot(N,H),0.0),uMaterial.shininess);
             vec3 specular = specularFactor * specularColor;
 
-            total += ambientColor+diffuse+specular;
+            if(uLight[i].spotlight == true){
+                float alfa = spotlightFunction(uLight[i]);
+
+                if(/*alfa*/5.0 > uLight[i].aperture){
+                    total += ambientColor;
+                }
+                else {
+                    float intensity = pow(cos((PI*alfa)/180.0),uLight[i].cutoff);
+                    total += (ambientColor+diffuse+specular)*1.0;//intensity;
+                }
+            }
+            else{
+                total += ambientColor+diffuse+specular;
+            }
+            
+            
         }
 
     }
