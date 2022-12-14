@@ -29,8 +29,8 @@ struct MaterialInfo {
     float shininess;
 };
 
-uniform mat4 mViewF;
-uniform mat4 mViewNormalsF;
+uniform mat4 mView;
+uniform mat4 mViewNormals;
 
 
 uniform int uNLights; // Effective number of lights used
@@ -41,13 +41,6 @@ uniform MaterialInfo uMaterial;  // The material of the object being drawn
 varying vec3 fViewer;
 varying vec3 fNormal;
 varying vec3 fPosition;
-
-float spotlightFunction(LightInfo light) {
-    vec3 fragToLight = light.pos.xyz - fPosition;
-    float alfa = acos(dot(normalize(fragToLight),normalize(light.axis))); 
-    return (180.0*alfa)/PI;
-    
-}
 
 void main() {
     vec3 total;
@@ -62,9 +55,9 @@ void main() {
             vec3 fLight;
            
             if(uLight[i].pos.w == 0.0)
-                fLight = normalize((mViewNormalsF * vec4(uLight[i].pos)).xyz);
+                fLight = normalize((mViewNormals * vec4(uLight[i].pos)).xyz);
             else
-                fLight = normalize((mViewF * vec4(uLight[i].pos)).xyz - fPosition);
+                fLight = normalize((mView * vec4(uLight[i].pos)).xyz - fPosition);
 
 
             //Meter lá para baixo a condição da spotlight
@@ -89,14 +82,15 @@ void main() {
             vec3 specular = specularFactor * specularColor;
 
             if(uLight[i].spotlight == true){
-                float alfa = spotlightFunction(uLight[i]);
+                vec3 lightDirection = normalize((vec4(uLight[i].pos)).xyz - fPosition);
+                float angle = acos(dot(lightDirection, normalize(-uLight[i].axis)));
+                angle = (180.0*angle)/PI;
 
-                if(/*alfa*/5.0 > uLight[i].aperture){
-                    total += ambientColor;
+                if(angle > uLight[i].aperture){
+                    total += vec3(0,0,0);
                 }
                 else {
-                    float intensity = pow(cos((PI*alfa)/180.0),uLight[i].cutoff);
-                    total += (ambientColor+diffuse+specular)*1.0;//intensity;
+                    total += pow(cos((PI*angle)/180.0), uLight[i].cutoff) * (ambientColor + diffuse + specular);
                 }
             }
             else{
