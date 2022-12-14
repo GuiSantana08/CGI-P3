@@ -1,5 +1,5 @@
 import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from '../../libs/utils.js';
-import {flatten, lookAt, perspective, vec3, normalMatrix } from "../../libs/MV.js";
+import {flatten, lookAt, perspective, vec2, vec3, normalMatrix } from "../../libs/MV.js";
 
 import * as dat from '../../libs/dat.gui.module.js';
 
@@ -11,10 +11,14 @@ import * as BUNNY from '../../libs/objects/bunny.js';
 
 import * as STACK from '../../libs/stack.js';
 
+let currentCursorPos = vec2(0.0,0.0);
+let currentMouseDown = vec2(0.0,0.0);
+let isDown = false;
+
 function main(shaders){
     
     let camera = {
-        eye: vec3(0,5,10),
+        eye: vec3(0,3,10),
         at: vec3(0,0,0),
         up: vec3(0,1,0,),
         fovy: 45,
@@ -27,7 +31,7 @@ function main(shaders){
             ambient: [50, 50, 50],
             diffuse: [60,60,60],
             specular: [200,200,200],
-            position: [0,0.0,10.0,1.0],
+            position: [0, 0.0, 2.0, 1.0],
             axis: [0.0,0.0,-1.0],
             aperture: 10.0,
             cutoff:10,
@@ -92,6 +96,13 @@ function main(shaders){
         Ks: [200,200,200],
         shininess: 100.0
     };
+
+    let lightMaterial = {
+        Ka: [255, 255, 255],
+        Kd: [255, 255, 255],
+        Ks: [255,255,255],
+        shininess: 50.0
+    }
 
     //Visualization options
     let options = {
@@ -225,6 +236,15 @@ function main(shaders){
     CYLINDER.init(gl);
     BUNNY.init(gl);
     
+    function getCursorPosition(canvas, event) {
+        const mx = event.offsetX;
+        const my = event.offsetY;
+
+        const x = ((mx / canvas.width * 2) - 1);
+        const y = (((canvas.height - my)/canvas.height * 2) - 1);
+
+        return vec2(x*canvas.width, y*(canvas.width*canvas.height/canvas.width));
+    }
 
     window.requestAnimationFrame(render);
 
@@ -244,8 +264,51 @@ function main(shaders){
     let mProjection = perspective(camera.fovy, aspect, camera.near, camera.far);
     
     
-    let lastX, lastY;
-    let down = false;
+    function getMove(currentMouseDown, currentCursorPos){
+        const xMD = currentMouseDown[0];
+        const xMM = currentCursorPos[0];
+        const yMD = currentMouseDown[1];
+        const yMM = currentCursorPos[1];
+
+        const xD = xMD - xMM;
+        const yD = yMD - yMM;
+
+        return vec2(xD/100, yD/100)
+
+
+
+
+    }
+
+    canvas.addEventListener("mousedown", function(event) {
+        if(event.altKey || event.shiftKey) {
+            isDown = true
+            currentMouseDown = getCursorPosition(canvas, event);
+        }
+    });
+    
+    canvas.addEventListener("mousemove", function(event) {
+        if(event.altKey && isDown){
+            currentCursorPos = getCursorPosition(canvas, event);
+            let move = getMove(currentMouseDown, currentCursorPos)
+            currentMouseDown = currentCursorPos;
+            if(event.ctrlKey){
+                camera.eye[1] += move[1]; //altera no X
+                camera.eye[2] += move[0];
+            }else{
+                camera.eye[0] += move[0];  // altera no Z
+                camera.eye[1] += move[1];
+            }
+        }
+    });
+
+    canvas.addEventListener("mouseup", function(event) {
+        isDown = false;
+    });
+
+
+
+
 
     function hideSpotLightOps(){
         if(lights[0].type == 'spotlight'){
@@ -270,6 +333,7 @@ function main(shaders){
 
     function render()
     {
+
         window.requestAnimationFrame(render);
 
         hideSpotLightOps();
@@ -349,6 +413,17 @@ function main(shaders){
         STACK.popMatrix();
         
 
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ka"),lightMaterial.Ka);
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Kd"),lightMaterial.Kd);
+        gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ks"),lightMaterial.Ks);
+        gl.uniform1f(gl.getUniformLocation(program,"uMaterial.shininess"),lightMaterial.shininess);
+        STACK.pushMatrix();
+        STACK.multTranslation(vec3(lights[2].position))
+        STACK.multScale([0.1,0.1,0.1]);
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
+        SPHERE.draw(gl, program, gl.LINES);
+        STACK.popMatrix();
+
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ka"),bunnyMaterial.Ka);
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Kd"),bunnyMaterial.Kd);
         gl.uniform3fv(gl.getUniformLocation(program,"uMaterial.Ks"),bunnyMaterial.Ks);
@@ -358,8 +433,10 @@ function main(shaders){
             STACK.multScale([12,12,12]);
             gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(STACK.modelView()));
             BUNNY.draw(gl,program,mode);
-            STACK.popMatrix();
         STACK.popMatrix()
+
+
+    
 
 
         for(let i = 0; i < lights.length; i++){
